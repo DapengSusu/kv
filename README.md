@@ -27,3 +27,9 @@
 * 客户端和服务器的接口或者说协议
 * 服务器和命令处理流程的接口
 * 服务器和存储的接口。
+
+## 使用方法
+1. git clone git@github.com:DapengSusu/kv.git
+2. cd kv
+3. export BUILD_PROTO=1
+4. cargo build
