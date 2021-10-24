@@ -6,3 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+prost = "0.9" # 处理 protobuf 的代码
+
+[build-dependencies]
+prost-build = "0.9" # 编译 protobuf

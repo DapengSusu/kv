@@ -1,3 +1,5 @@
+mod pb;
+
 #[cfg(test)]
 mod tests {
     #[test]
