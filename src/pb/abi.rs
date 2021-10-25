@@ -45,7 +45,7 @@ pub struct CommandResponse {
     pub values: ::prost::alloc::vec::Vec<Value>,
     /// 成功返回的 kv pairs
     #[prost(message, repeated, tag="4")]
-    pub pairs: ::prost::alloc::vec::Vec<KVpair>,
+    pub pairs: ::prost::alloc::vec::Vec<KvPair>,
 }
 /// 从 table 中获取一个 key，返回 value
 #[derive(PartialOrd)]
@@ -56,7 +56,7 @@ pub struct Hget {
     #[prost(string, tag="2")]
     pub key: ::prost::alloc::string::String,
 }
-/// 从 table 中获取所有的 KVpair
+/// 从 table 中获取所有的 KVPair
 #[derive(PartialOrd)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Hgetall {
@@ -99,7 +99,7 @@ pub mod value {
 /// 返回的kvpair
 #[derive(PartialOrd)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct KVpair {
+pub struct KvPair {
     #[prost(string, tag="1")]
     pub key: ::prost::alloc::string::String,
     #[prost(message, optional, tag="2")]
@@ -113,7 +113,7 @@ pub struct Hset {
     #[prost(string, tag="1")]
     pub table: ::prost::alloc::string::String,
     #[prost(message, optional, tag="2")]
-    pub pair: ::core::option::Option<KVpair>,
+    pub pair: ::core::option::Option<KvPair>,
 }
 /// 往 table 中存一组 kvpair
 /// 如果 table 不存在，就创建这个 table
@@ -123,7 +123,7 @@ pub struct Hmset {
     #[prost(string, tag="1")]
     pub table: ::prost::alloc::string::String,
     #[prost(message, repeated, tag="2")]
-    pub pairs: ::prost::alloc::vec::Vec<KVpair>,
+    pub pairs: ::prost::alloc::vec::Vec<KvPair>,
 }
 /// 从 table 中删除一个 key，返回它之前的值
 #[derive(PartialOrd)]

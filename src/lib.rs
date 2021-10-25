@@ -1,10 +1,9 @@
 mod pb;
+mod storage;
+mod error;
+mod service;
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
-    }
-}
+pub use pb::abi::*;
+pub use error::KVError;
+pub use storage::*;
+pub use service::*;

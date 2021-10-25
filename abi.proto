@@ -26,7 +26,7 @@ message CommandResponse {
     // 成功返回的values
     repeated Value values = 3;
     // 成功返回的 kv pairs
-    repeated KVpair pairs = 4;
+    repeated KVPair pairs = 4;
 }
 
 // 从 table 中获取一个 key，返回 value
@@ -35,7 +35,7 @@ message Hget {
     string key = 2;
 }
 
-// 从 table 中获取所有的 KVpair
+// 从 table 中获取所有的 KVPair
 message Hgetall { string table = 1; }
 
 // 从 table 中获取一组 key，返回它们的 value
@@ -56,7 +56,7 @@ message Value {
 }
 
 // 返回的kvpair
-message KVpair {
+message KVPair {
     string key = 1;
     Value value = 2;
 }
@@ -65,14 +65,14 @@ message KVpair {
 // 如果 table 不存在，就创建这个 table
 message Hset {
     string table = 1;
-    KVpair pair = 2;
+    KVPair pair = 2;
 }
 
 // 往 table 中存一组 kvpair
 // 如果 table 不存在，就创建这个 table
 message Hmset {
     string table = 1;
-    repeated KVpair pairs = 2;
+    repeated KVPair pairs = 2;
 }
 
 // 从 table 中删除一个 key，返回它之前的值
