@@ -14,7 +14,7 @@ impl CommandService for Hset {
 }
 
 impl CommandService for Hget {
-    fn execute(self, store: &impl crate::Storage) -> crate::CommandResponse {
+    fn execute(self, store: &impl crate::Storage) -> CommandResponse {
         match store.get(&self.table, &self.key) {
             Ok(Some(v)) => v.into(),
             Ok(None) => KVError::NotFound(self.table, self.key).into(),
@@ -27,6 +27,16 @@ impl CommandService for Hgetall {
     fn execute(self, store: &impl Storage) -> CommandResponse {
         match store.get_all(&self.table) {
             Ok(v) => v.into(),
+            Err(e) => e.into(),
+        }
+    }
+}
+
+impl CommandService for Hdel {
+    fn execute(self, store: &impl Storage) -> CommandResponse {
+        match store.del(&self.table, &self.key) {
+            Ok(Some(v)) => v.into(),
+            Ok(None) => KVError::NotFound(self.table, self.key).into(),
             Err(e) => e.into(),
         }
     }
@@ -94,12 +104,39 @@ mod test {
         assert_res_ok(res, &[], pairs);
     }
 
-    // 从 Request 中得到 Response，目前处理 HSET，HGET，HGETALL
+    #[test]
+    fn hdel_should_work() {
+        let store = MemTable::new();
+        let cmd = CommandRequest::new_hset("score", "u1", 60.into());
+        let _ = dispatch(cmd, &store);
+        let cmd = CommandRequest::new_hset("score", "u2", 74.into());
+        let _ = dispatch(cmd, &store);
+
+        let cmd = CommandRequest::new_hdel("score", "u1");
+        let res = dispatch(cmd, &store);
+
+        assert_res_ok(res, &[60.into()], &[]);
+    }
+
+    #[test]
+    fn hdel_with_non_exist_key_should_return_404() {
+        let store = MemTable::new();
+        let cmd = CommandRequest::new_hset("score", "u1", 56.into());
+        let _ = dispatch(cmd, &store);
+
+        let cmd = CommandRequest::new_hdel("score", "u2");
+        let res = dispatch(cmd, &store);
+
+        assert_res_error(res, 404, "Not found");
+    }
+
+    // 从 Request 中得到 Response，目前处理 HSET，HGET，HGETALL，HDEL
     fn dispatch(cmd: CommandRequest, store: &impl Storage) -> CommandResponse {
         match cmd.request_data.unwrap() {
             RequestData::Hset(v) => v.execute(store),
             RequestData::Hget(v) => v.execute(store),
             RequestData::Hgetall(v) => v.execute(store),
+            RequestData::Hdel(v) => v.execute(store),
             _ => todo!(), // TODO
         }
     }

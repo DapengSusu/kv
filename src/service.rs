@@ -45,12 +45,13 @@ impl<Store: Storage> Service<Store> {
     }
 }
 
-// 从 Request 中得到 Response，目前处理 HSET，HGET，HGETALL
+// 从 Request 中得到 Response，目前处理 HSET，HGET，HGETALL，HDEL
 pub fn dispatch(cmd: CommandRequest, store: &impl Storage) -> CommandResponse {
     match cmd.request_data {
         Some(RequestData::Hset(param)) => param.execute(store),
         Some(RequestData::Hget(param)) => param.execute(store),
         Some(RequestData::Hgetall(param)) => param.execute(store),
+        Some(RequestData::Hdel(param)) => param.execute(store),
         None => KVError::InvalidCommand("Request has no data".into()).into(),
         _ => KVError::InternalError("Not implemented".into()).into(),
     }

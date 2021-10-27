@@ -41,3 +41,12 @@
 * 为剩下 6 个命令 HMGET、HMSET、HDEL、HMDEL、HEXIST、HMEXIST 构建测试，并实现它们
 * 实现 MemTable 的 get_iter() 方法
 * 延伸：可以创建一个线程池，每个线程有自己的 HashMap。当 HGET/HSET 等命令来临时，可以对 key 做个哈希，然后分派到 “拥有” 那个 key 的线程，这样，可以避免在处理的时候加锁，提高系统的吞吐
+
+##### 实现剩余命令
+- [ ] HMGET
+- [ ] HMSET
+- [x] HDEL
+- [ ] HMDEL
+- [ ] HEXIST
+- [ ] HMEXIST
+- [ ] ...
