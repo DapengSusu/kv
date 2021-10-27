@@ -31,5 +31,13 @@
 ## 使用方法
 1. git clone git@github.com:DapengSusu/kv.git
 2. cd kv
-3. export BUILD_PROTO=1
-4. cargo build
+3. ~~export BUILD_PROTO=1~~
+4. cargo build --release
+5. cargo test
+6. cargo r --release --example service --quiet
+7. 另开一个终端: cargo r --release --example client --quiet
+
+## 下一步计划
+* 为剩下 6 个命令 HMGET、HMSET、HDEL、HMDEL、HEXIST、HMEXIST 构建测试，并实现它们
+* 实现 MemTable 的 get_iter() 方法
+* 延伸：可以创建一个线程池，每个线程有自己的 HashMap。当 HGET/HSET 等命令来临时，可以对 key 做个哈希，然后分派到 “拥有” 那个 key 的线程，这样，可以避免在处理的时候加锁，提高系统的吞吐
