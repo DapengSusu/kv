@@ -1,6 +1,8 @@
-use async_prost::AsyncProstStream;
-use futures::{SinkExt, StreamExt};
+//! deprecated_client.rs
+//! 依赖于外部 crate：prost_stream
+
 use kv::{CommandRequest, CommandResponse};
+use prost_stream::AsyncStream;
 use tokio::net::TcpStream;
 use tracing::info;
 
@@ -13,9 +15,7 @@ async fn main() -> anyhow::Result<()> {
     let addr = "127.0.0.1:9527";
     let stream = TcpStream::connect(addr).await?;
 
-    // 使用 AsyncProstStream 来处理 TCP Frame
-    let mut client =
-        AsyncProstStream::<_, CommandResponse, CommandRequest, _>::from(stream).for_async();
+    let mut client = AsyncStream::new(stream);
 
     info!("Connected to {}", addr);
 
@@ -23,11 +23,12 @@ async fn main() -> anyhow::Result<()> {
     let cmd = CommandRequest::new_hset("table1", "hello", "world".to_string().into());
 
     // 发送 Hset 命令
-    client.send(cmd).await?;
+    client.send(&cmd).await?;
 
-    if let Some(Ok(data)) = client.next().await {
-        info!("Got response {:?}", data);
-    }
+    // 接收响应
+    let data: CommandResponse = client.recv().await?;
+
+    info!("Got response {:?}", data);
 
     Ok(())
 }

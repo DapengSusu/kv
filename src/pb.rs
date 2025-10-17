@@ -12,7 +12,7 @@ impl CommandRequest {
             request_data: Some(RequestData::Hset(Hset {
                 table: table.into(),
                 pair: Some(KvPair::new(key, value)),
-            }))
+            })),
         }
     }
 
@@ -22,7 +22,7 @@ impl CommandRequest {
             request_data: Some(RequestData::Hget(Hget {
                 table: table.into(),
                 key: key.into(),
-            }))
+            })),
         }
     }
 
@@ -30,8 +30,8 @@ impl CommandRequest {
     pub fn new_hgetall(table: impl Into<String>) -> Self {
         Self {
             request_data: Some(RequestData::Hgetall(Hgetall {
-                table: table.into()
-            }))
+                table: table.into(),
+            })),
         }
     }
 
@@ -41,7 +41,7 @@ impl CommandRequest {
             request_data: Some(RequestData::Hdel(Hdel {
                 table: table.into(),
                 key: key.into(),
-            }))
+            })),
         }
     }
 }
@@ -59,21 +59,27 @@ impl KvPair {
 /// 从 String 转成 Value
 impl From<String> for Value {
     fn from(s: String) -> Self {
-        Self { value: Some(value::Value::String(s)) }
+        Self {
+            value: Some(value::Value::String(s)),
+        }
     }
 }
 
 /// 从 &str 转成 Value
 impl From<&str> for Value {
     fn from(s: &str) -> Self {
-        Self { value: Some(value::Value::String(s.into())) }
+        Self {
+            value: Some(value::Value::String(s.into())),
+        }
     }
 }
 
 /// 从i64 转成 Value
 impl From<i64> for Value {
     fn from(i: i64) -> Self {
-        Self { value: Some(value::Value::Integer(i)) }
+        Self {
+            value: Some(value::Value::Integer(i)),
+        }
     }
 }
 

@@ -1,6 +1,5 @@
-use async_prost::AsyncProstStream;
-use kv::{CommandRequest, CommandResponse};
-use futures::prelude::*;
+use prost_stream::AsyncStream;
+use kv::CommandResponse;
 use tokio::net::TcpListener;
 use tracing::info;
 
@@ -17,17 +16,18 @@ async fn main() -> anyhow::Result<()> {
         info!("Client {:?} connected", addr);
 
         tokio::spawn(async move {
-            let mut stream =
-                AsyncProstStream::<_, CommandRequest, CommandResponse, _>::from(stream).for_async();
+            let mut stream = AsyncStream::new(stream);
 
-            while let Some(Ok(msg)) = stream.next().await {
+            while let Ok(msg) = stream.recv::<CommandResponse>().await {
                 info!("Got a new command: {:?}", msg);
                 // 创建一个 404 response 返回给客户端
-                let mut resp = CommandResponse::default();
+                let resp = CommandResponse {
+                    status: 404,
+                    message: "Not found".to_string(),
+                    ..Default::default()
+                };
 
-                resp.status = 404;
-                resp.message = "Not found".to_string();
-                stream.send(resp).await.unwrap();
+                stream.send(&resp).await.unwrap();
             }
             info!("Client {:?} disconnected", addr);
         });

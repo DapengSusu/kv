@@ -1,15 +1,10 @@
 mod command_service;
 
+use crate::{
+    CommandRequest, CommandResponse, KVError, MemTable, Storage, command_request::RequestData,
+};
 use std::sync::Arc;
 use tracing::debug;
-use crate::{
-    CommandRequest,
-    CommandResponse,
-    KVError,
-    MemTable,
-    Storage,
-    command_request::RequestData
-};
 
 /// 对 Command 的处理的抽象
 pub trait CommandService {
@@ -19,18 +14,22 @@ pub trait CommandService {
 
 /// Service 数据结构
 pub struct Service<Store = MemTable> {
-    inner: Arc<ServiceInner<Store>>
+    inner: Arc<ServiceInner<Store>>,
 }
 
 impl<Store> Clone for Service<Store> {
     fn clone(&self) -> Self {
-        Self { inner: Arc::clone(&self.inner) }
+        Self {
+            inner: Arc::clone(&self.inner),
+        }
     }
 }
 
 impl<Store: Storage> Service<Store> {
     pub fn new(store: Store) -> Self {
-        Self { inner: Arc::new(ServiceInner { store }) }
+        Self {
+            inner: Arc::new(ServiceInner { store }),
+        }
     }
 
     pub fn execute(&self, cmd: CommandRequest) -> CommandResponse {
@@ -59,14 +58,33 @@ pub fn dispatch(cmd: CommandRequest, store: &impl Storage) -> CommandResponse {
 
 /// Service 内部数据结构
 pub struct ServiceInner<Store> {
-    store: Store
+    store: Store,
 }
 
 #[cfg(test)]
 mod tests {
-    use std::thread;
     use super::*;
     use crate::MemTable;
+    use crate::{KvPair, Value};
+    use std::thread;
+
+    // 测试成功返回的结果
+    pub fn assert_res_ok(mut res: CommandResponse, values: &[Value], pairs: &[KvPair]) {
+        res.pairs.sort_by(|a, b| a.partial_cmp(b).unwrap());
+
+        assert_eq!(res.status, 200);
+        assert_eq!(res.message, "");
+        assert_eq!(res.values, values);
+        assert_eq!(res.pairs, pairs);
+    }
+
+    // // 测试失败返回的结果
+    // pub fn assert_res_error(res: CommandResponse, code: u32, msg: &str) {
+    //     assert_eq!(res.status, code);
+    //     assert!(res.message.contains(msg));
+    //     assert_eq!(res.values, &[]);
+    //     assert_eq!(res.pairs, &[]);
+    // }
 
     #[test]
     fn service_should_work() {
@@ -78,9 +96,7 @@ mod tests {
 
         // 创建一个线程，在 table t1 里写入 k1，v1
         let handle = thread::spawn(move || {
-            let res = cloned.execute(
-                CommandRequest::new_hset("t1", "k1", "v1".into())
-            );
+            let res = cloned.execute(CommandRequest::new_hset("t1", "k1", "v1".into()));
 
             assert_res_ok(res, &[Value::default()], &[]);
         });
@@ -88,33 +104,8 @@ mod tests {
         handle.join().unwrap();
 
         // 在当前线程读取 table t1 的 k1，应该返回 v1
-        let res = service.execute(
-            CommandRequest::new_hget("t1", "k1")
-        );
+        let res = service.execute(CommandRequest::new_hget("t1", "k1"));
 
         assert_res_ok(res, &["v1".into()], &[]);
     }
-}
-
-#[cfg(test)]
-use crate::{Value, KvPair};
-
-// 测试成功返回的结果
-#[cfg(test)]
-pub fn assert_res_ok(mut res: CommandResponse, values: &[Value], pairs: &[KvPair]) {
-    res.pairs.sort_by(|a, b| a.partial_cmp(b).unwrap());
-
-    assert_eq!(res.status, 200);
-    assert_eq!(res.message, "");
-    assert_eq!(res.values, values);
-    assert_eq!(res.pairs, pairs);
-}
-
-// 测试失败返回的结果
-#[cfg(test)]
-pub fn assert_res_error(res: CommandResponse, code: u32, msg: &str) {
-    assert_eq!(res.status, code);
-    assert!(res.message.contains(msg));
-    assert_eq!(res.values, &[]);
-    assert_eq!(res.pairs, &[]);
 }

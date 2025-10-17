@@ -86,7 +86,7 @@ mod test {
             CommandRequest::new_hset("score", "u1", 10.into()),
             CommandRequest::new_hset("score", "u2", 8.into()),
             CommandRequest::new_hset("score", "u3", 11.into()),
-            CommandRequest::new_hset("score", "u1", 6.into())
+            CommandRequest::new_hset("score", "u1", 6.into()),
         ];
 
         for cmd in cmds {
@@ -98,7 +98,7 @@ mod test {
         let pairs = &[
             KvPair::new("u1", 6.into()),
             KvPair::new("u2", 8.into()),
-            KvPair::new("u3", 11.into())
+            KvPair::new("u3", 11.into()),
         ];
 
         assert_res_ok(res, &[], pairs);

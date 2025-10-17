@@ -1,24 +1,36 @@
 [package]
 name = "kv"
 version = "0.1.0"
-edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+edition = "2024"
+publish = false
 
 [dependencies]
-prost = "0.8" # 处理 protobuf 的代码
-bytes = "1.1" # 高效处理网络 buffer 的库
-thiserror = "1.0" # 错误定义和处理
-dashmap = "4.0" # 并发 HashMap
-http = "0.2" # 提供 HTTP status code
+prost = "0.14" # 处理 protobuf 的代码
+bytes = "1" # 高效处理网络 buffer 的库
+thiserror = "2" # 错误定义和处理
+dashmap = "6" # 并发 HashMap
+http = "1" # 提供 HTTP status code
 tracing = "0.1" # 日志处理
 
 [dev-dependencies]
-anyhow = "1.0" # 错误处理
-async-prost = "0.2" # 支持把 protobuf 封装成 TCP frame
-futures = "0.3" # 提供 Stream trait
-tokio = { version = "1.12", features = ["rt", "rt-multi-thread", "io-util", "macros", "net"] } # 异步网络库
+anyhow = "1" # 错误处理
+async-prost = { path = "libs/async-prost" } # 将 protobuf 封装成 TCP frame
+futures = "0.3.31"
+prost-stream = { path = "libs/prost-stream", features = ["async"] } # 从一个 Stream 中读取 protobuf
+tokio = { version = "1", features = ["io-util", "macros", "net", "rt-multi-thread", "rt"] } # 异步网络库
 tracing-subscriber = "0.3" # 日志处理
 
 [build-dependencies]
-prost-build = "0.8" # 编译 protobuf
+prost-build = "0.14" # 编译 protobuf
+
+[[example]]
+name = "server"
+
+[[example]]
+name = "client"
+
+[[example]]
+name = "dummy_server"
+
+[[example]]
+name = "prost_server"

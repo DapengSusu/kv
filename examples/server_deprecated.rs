@@ -1,6 +1,8 @@
-use async_prost::AsyncProstStream;
-use kv::{CommandRequest, CommandResponse, MemTable, Service};
-use futures::prelude::*;
+//! deprecated_server.rs
+//! 依赖于外部 crate：prost_stream
+
+use kv::{MemTable, Service};
+use prost_stream::AsyncStream;
 use tokio::net::TcpListener;
 use tracing::info;
 
@@ -17,15 +19,13 @@ async fn main() -> anyhow::Result<()> {
         let (stream, addr) = listener.accept().await?;
         info!("Client {:?} connected", addr);
         let svc = service.clone();
+        let mut stream = AsyncStream::new(stream);
 
         tokio::spawn(async move {
-            let mut stream =
-                AsyncProstStream::<_, CommandRequest, CommandResponse, _>::from(stream).for_async();
-
-            while let Some(Ok(cmd)) = stream.next().await {
+            while let Ok(cmd) = stream.recv().await {
                 info!("Got a new command: {:?}", cmd);
                 let res = svc.execute(cmd);
-                stream.send(res).await.unwrap();
+                stream.send(&res).await.unwrap();
             }
             info!("Client {:?} disconnected", addr);
         });
