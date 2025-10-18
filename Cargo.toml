@@ -15,7 +15,7 @@ tracing = "0.1" # 日志处理
 [dev-dependencies]
 anyhow = "1" # 错误处理
 async-prost = { path = "libs/async-prost" } # 将 protobuf 封装成 TCP frame
-futures = "0.3.31"
+futures = "0.3"
 prost-stream = { path = "libs/prost-stream", features = ["async"] } # 从一个 Stream 中读取 protobuf
 tokio = { version = "1", features = ["io-util", "macros", "net", "rt-multi-thread", "rt"] } # 异步网络库
 tracing-subscriber = "0.3" # 日志处理
@@ -31,6 +31,3 @@ name = "client"
 
 [[example]]
 name = "dummy_server"
-
-[[example]]
-name = "prost_server"

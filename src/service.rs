@@ -62,29 +62,34 @@ pub struct ServiceInner<Store> {
 }
 
 #[cfg(test)]
+use crate::{KvPair, Value};
+
+// 测试成功返回的结果
+#[cfg(test)]
+pub(crate) fn assert_res_ok(mut res: CommandResponse, values: &[Value], pairs: &[KvPair]) {
+    res.pairs.sort_by(|a, b| a.partial_cmp(b).unwrap());
+
+    assert_eq!(res.status, 200);
+    assert_eq!(res.message, "");
+    assert_eq!(res.values, values);
+    assert_eq!(res.pairs, pairs);
+}
+
+// 测试失败返回的结果
+#[cfg(test)]
+pub(crate) fn assert_res_error(res: CommandResponse, code: u32, msg: &str) {
+    assert_eq!(res.status, code);
+    assert!(res.message.contains(msg));
+    assert_eq!(res.values, &[]);
+    assert_eq!(res.pairs, &[]);
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
     use crate::MemTable;
-    use crate::{KvPair, Value};
+    use crate::Value;
     use std::thread;
-
-    // 测试成功返回的结果
-    pub fn assert_res_ok(mut res: CommandResponse, values: &[Value], pairs: &[KvPair]) {
-        res.pairs.sort_by(|a, b| a.partial_cmp(b).unwrap());
-
-        assert_eq!(res.status, 200);
-        assert_eq!(res.message, "");
-        assert_eq!(res.values, values);
-        assert_eq!(res.pairs, pairs);
-    }
-
-    // // 测试失败返回的结果
-    // pub fn assert_res_error(res: CommandResponse, code: u32, msg: &str) {
-    //     assert_eq!(res.status, code);
-    //     assert!(res.message.contains(msg));
-    //     assert_eq!(res.values, &[]);
-    //     assert_eq!(res.pairs, &[]);
-    // }
 
     #[test]
     fn service_should_work() {
