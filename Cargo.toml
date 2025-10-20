@@ -5,19 +5,29 @@ edition = "2024"
 publish = false
 
 [dependencies]
-prost = "0.14" # 处理 protobuf 的代码
-bytes = "1" # 高效处理网络 buffer 的库
+prost = "0.14"  # 处理 protobuf 的代码
+bytes = "1"     # 高效处理网络 buffer 的库
 thiserror = "2" # 错误定义和处理
-dashmap = "6" # 并发 HashMap
-http = "1" # 提供 HTTP status code
+dashmap = "6"   # 并发 HashMap
+http = "1"      # 提供 HTTP status code
 tracing = "0.1" # 日志处理
+sled = "0.34"
 
 [dev-dependencies]
 anyhow = "1" # 错误处理
 async-prost = { path = "libs/async-prost" } # 将 protobuf 封装成 TCP frame
 futures = "0.3"
-prost-stream = { path = "libs/prost-stream", features = ["async"] } # 从一个 Stream 中读取 protobuf
-tokio = { version = "1", features = ["io-util", "macros", "net", "rt-multi-thread", "rt"] } # 异步网络库
+prost-stream = { path = "libs/prost-stream", features = [
+    "async",
+] } # 从一个 Stream 中读取 protobuf
+tempfile = "3"
+tokio = { version = "1", features = [
+    "io-util",
+    "macros",
+    "net",
+    "rt-multi-thread",
+    "rt",
+] } # 异步网络库
 tracing-subscriber = "0.3" # 日志处理
 
 [build-dependencies]
@@ -31,3 +41,6 @@ name = "client"
 
 [[example]]
 name = "dummy_server"
+
+[[example]]
+name = "server_with_sled"

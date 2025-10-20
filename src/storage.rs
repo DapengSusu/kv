@@ -1,7 +1,9 @@
 mod memory;
+mod sled_db;
 
 use crate::{KVError, KvPair, Value};
 pub use memory::MemTable;
+pub use sled_db::SledDb;
 
 /// 对存储的抽象，我们不关心数据存在哪儿，但需要定义外界如何和存储打交道
 pub trait Storage {
@@ -16,7 +18,31 @@ pub trait Storage {
     /// 遍历 HashTable，返回所有 kv pair（这个接口不好）
     fn get_all(&self, table: &str) -> Result<Vec<KvPair>, KVError>;
     /// 遍历 HashTable，返回 kv pair 的 Iterator
-    fn get_iter(&self, table: &str) -> Result<Box<dyn Iterator<Item = KvPair>>, KVError>;
+    fn get_iter(&self, table: &str) -> Result<impl Iterator<Item = KvPair>, KVError>;
+    // fn get_iter(&self, table: &str) -> Result<Box<dyn Iterator<Item = KvPair>>, KVError>;
+}
+
+/// 提供 Storage iterator，这样 trait 实现者只需将它们的 iterator 提供给 StorageIter，并保证 next() 的传出类型实现了 Into<KvPair> 即可
+pub struct StorageIter<T> {
+    data: T,
+}
+
+impl<T> StorageIter<T> {
+    pub fn new(data: T) -> Self {
+        Self { data }
+    }
+}
+
+impl<T> Iterator for StorageIter<T>
+where
+    T: Iterator,
+    T::Item: Into<KvPair>,
+{
+    type Item = KvPair;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.data.next().map(|v| v.into())
+    }
 }
 
 #[cfg(test)]
@@ -35,11 +61,32 @@ mod tests {
         test_get_all(store);
     }
 
-    // #[test]
-    // fn memtable_iter_should_work() {
-    //     let store = MemTable::new();
-    //     test_get_iter(store);
-    // }
+    #[test]
+    fn memtable_iter_should_work() {
+        let store = MemTable::new();
+        test_get_iter(store);
+    }
+
+    #[test]
+    fn sled_db_basic_interface_should_work() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = SledDb::new(dir);
+        test_basic_interface(store);
+    }
+
+    #[test]
+    fn sled_db_get_all_should_work() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = SledDb::new(dir);
+        test_get_all(store);
+    }
+
+    #[test]
+    fn sled_db_iter_should_work() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = SledDb::new(dir);
+        test_get_iter(store);
+    }
 
     fn test_basic_interface(store: impl Storage) {
         // 第一次 set 会创建 table，插入 key 并返回 None（之前没值）
@@ -92,7 +139,6 @@ mod tests {
         );
     }
 
-    #[allow(dead_code)]
     fn test_get_iter(store: impl Storage) {
         store.set("t2", "k1".into(), "v1".into()).unwrap();
         store.set("t2", "k2".into(), "v2".into()).unwrap();

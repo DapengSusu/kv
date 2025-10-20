@@ -1,7 +1,7 @@
 //! deprecated_server.rs
 //! 依赖于外部 crate：prost_stream
 
-use kv::{MemTable, Service};
+use kv::{MemTable, Service, ServiceInner};
 use prost_stream::AsyncStream;
 use tokio::net::TcpListener;
 use tracing::info;
@@ -10,7 +10,7 @@ use tracing::info;
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
 
-    let service = Service::new(MemTable::new());
+    let service: Service = ServiceInner::new(MemTable::new()).into();
     let addr = "127.0.0.1:9527";
     let listener = TcpListener::bind(addr).await?;
     info!("Start listening on {}", addr);

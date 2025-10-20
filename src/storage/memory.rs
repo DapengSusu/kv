@@ -1,4 +1,4 @@
-use crate::{KvPair, Storage, Value};
+use crate::{KVError, KvPair, Storage, StorageIter, Value};
 use dashmap::{DashMap, mapref::one::Ref};
 
 /// 使用 DashMap 构建的 MemTable，实现了 Storage trait
@@ -23,31 +23,31 @@ impl MemTable {
 }
 
 impl Storage for MemTable {
-    fn get(&self, table: &str, key: &str) -> Result<Option<Value>, crate::KVError> {
+    fn get(&self, table: &str, key: &str) -> Result<Option<Value>, KVError> {
         let table = self.get_or_create_table(table);
 
         Ok(table.get(key).map(|v| v.value().clone()))
     }
 
-    fn set(&self, table: &str, key: String, value: Value) -> Result<Option<Value>, crate::KVError> {
+    fn set(&self, table: &str, key: String, value: Value) -> Result<Option<Value>, KVError> {
         let table = self.get_or_create_table(table);
 
         Ok(table.insert(key, value))
     }
 
-    fn contains(&self, table: &str, key: &str) -> Result<bool, crate::KVError> {
+    fn contains(&self, table: &str, key: &str) -> Result<bool, KVError> {
         let table = self.get_or_create_table(table);
 
         Ok(table.contains_key(key))
     }
 
-    fn del(&self, table: &str, key: &str) -> Result<Option<Value>, crate::KVError> {
+    fn del(&self, table: &str, key: &str) -> Result<Option<Value>, KVError> {
         let table = self.get_or_create_table(table);
 
         Ok(table.remove(key).map(|(_, v)| v))
     }
 
-    fn get_all(&self, table: &str) -> Result<Vec<crate::KvPair>, crate::KVError> {
+    fn get_all(&self, table: &str) -> Result<Vec<KvPair>, KVError> {
         let table = self.get_or_create_table(table);
 
         Ok(table
@@ -56,10 +56,15 @@ impl Storage for MemTable {
             .collect())
     }
 
-    fn get_iter(
-        &self,
-        _table: &str,
-    ) -> Result<Box<dyn Iterator<Item = crate::KvPair>>, crate::KVError> {
-        todo!() // TODO
+    fn get_iter(&self, table: &str) -> Result<impl Iterator<Item = KvPair>, KVError> {
+        let table = self.get_or_create_table(table).clone();
+
+        Ok(StorageIter::new(table.into_iter()))
+    }
+}
+
+impl From<(String, Value)> for KvPair {
+    fn from(data: (String, Value)) -> Self {
+        KvPair::new(data.0, data.1)
     }
 }
