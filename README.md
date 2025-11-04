@@ -31,7 +31,7 @@
 ## 使用方法
 1. git clone git@github.com:DapengSusu/kv.git
 2. cd kv
-3. cargo b --release
+3. cargo b
 4. cargo nextest run
 5. cargo r --release --example server -q
 6. 另开一个终端: cargo r --release --example client -q

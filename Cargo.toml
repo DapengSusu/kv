@@ -11,36 +11,50 @@ thiserror = "2" # 错误定义和处理
 dashmap = "6"   # 并发 HashMap
 http = "1"      # 提供 HTTP status code
 tracing = "0.1" # 日志处理
-sled = "0.34"
+sled = "0.34"   # 持久化存储
 
 [dev-dependencies]
 anyhow = "1" # 错误处理
-async-prost = { path = "libs/async-prost" } # 将 protobuf 封装成 TCP frame
+# async-prost = { path = "libs/async-prost" } # 将 protobuf 封装成 TCP frame
 futures = "0.3"
-prost-stream = { path = "libs/prost-stream", features = [
-    "async",
-] } # 从一个 Stream 中读取 protobuf
-tempfile = "3"
+# prost-stream = { path = "libs/prost-stream", features = [
+#     "async",
+# ] } # 从一个 Stream 中读取 protobuf
+tempfile = "3" # 临时文件的创建和管理
 tokio = { version = "1", features = [
     "io-util",
     "macros",
     "net",
     "rt-multi-thread",
-    "rt",
 ] } # 异步网络库
+tokio-util = { version = "0.7", features = [
+    "codec",
+] } # 提供 Framed 和 LengthDelimitedCodec
 tracing-subscriber = "0.3" # 日志处理
 
 [build-dependencies]
 prost-build = "0.14" # 编译 protobuf
 
 [[example]]
-name = "server"
+name = "client"
+path = "examples/clients/client.rs"
 
 [[example]]
-name = "client"
+name = "server"
+path = "examples/servers/server.rs"
 
 [[example]]
 name = "dummy_server"
+path = "examples/servers/dummy_server.rs"
 
 [[example]]
 name = "server_with_sled"
+path = "examples/servers/server_with_sled.rs"
+
+# [[example]]
+# name = "server_framed"
+# path = "examples/extras/server_framed.rs"
+
+# [[example]]
+# name = "client_framed"
+# path = "examples/extras/client_framed.rs"
